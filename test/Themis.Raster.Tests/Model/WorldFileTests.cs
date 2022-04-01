@@ -67,7 +67,7 @@ namespace Themis.Raster.Tests.Model
             double expectedTop = _faker.Random.Double(double.MinValue, MinValue - 1E-3);
             double expectedLeft = _faker.Random.Double(double.MinValue, MinValue - 1E-3);
 
-            var actual = _wordFileFaker.Generate().SetTopLeft(expectedTop, expectedLeft);
+            var actual = _wordFileFaker.Generate().SetTopLeft(expectedLeft, expectedTop);
 
             Assert.Equal(expectedTop, actual.Top);
             Assert.Equal(expectedLeft, actual.Left);
@@ -78,7 +78,7 @@ namespace Themis.Raster.Tests.Model
         {
             var expected = _wordFileFaker.Generate();
 
-            var actual = WorldFile.Generate(expected.Top, expected.Left, expected.PixelSize);
+            var actual = WorldFile.Generate(expected.Left, expected.Top, expected.PixelSize);
 
             Assert.Equal(expected, actual);
         }

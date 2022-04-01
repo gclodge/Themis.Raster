@@ -19,10 +19,10 @@ namespace Themis.Raster.Model
             return this;
         }
 
-        public IWorldFile SetTopLeft(double top, double left)
+        public IWorldFile SetTopLeft(double x, double y)
         {
-            this.Top = top;
-            this.Left = left;
+            this.Top = y;
+            this.Left = x;
             return this;
         }
         #endregion
