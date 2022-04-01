@@ -1,15 +1,10 @@
-﻿using MathNet.Numerics.LinearAlgebra;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Themis.Geometry;
+﻿using Themis.Geometry;
 using Themis.Geometry.Boundary;
 using Themis.Geometry.Boundary.Interfaces;
 
 using Themis.Raster.Model.Interfaces;
+
+using MathNet.Numerics.LinearAlgebra;
 
 namespace Themis.Raster.Model
 {
@@ -28,12 +23,29 @@ namespace Themis.Raster.Model
         public Vector<double> Minimum => new[] { Top, Left }.ToVector();
         public Vector<double> Maximum => new[] { Right, Bottom }.ToVector();
 
-        private readonly IBoundingBox bb;
         public IBoundingBox BoundingBox => bb;
+        public IInfiniteGrid<RasterCell<T>> Grid => grid;
 
-        public T GetValue(double x, double y)
+        private readonly IBoundingBox bb;
+        private readonly IInfiniteGrid<RasterCell<T>> grid;
+
+        public Raster(int width, int height, double pixelSize)
         {
-            throw new NotImplementedException();
+            this.Width = width;
+            this.Height = height;
+            this.PixelSize = pixelSize;
+
+            bb = new BoundingBox();
+            grid = new InfiniteGrid<RasterCell<T>>(pixelSize);
+        }
+
+        public bool TryGetValue(double x, double y, out T? value)
+        {
+            value = default(T);
+            if (!grid.Contains(x, y)) return false;
+
+            value = grid.Get(x, y).Value;
+            return true;
         }
 
         public void CheckExtrema(IEnumerable<T> values)

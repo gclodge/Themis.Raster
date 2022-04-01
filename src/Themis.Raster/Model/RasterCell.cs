@@ -1,57 +1,77 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Themis.Raster.Model.Interfaces;
+﻿using Themis.Raster.Model.Interfaces;
 
 namespace Themis.Raster.Model
 {
     public class RasterCell<T> : IRasterCell<T>
     {
-        readonly T? value;
-
-        public T? Value => value;
+        public T Value { get; set; }
 
         public long XIndex { get; set; }
         public long YIndex { get; set; }
 
-        public double CellSize => throw new NotImplementedException();
+        public double CellSize { get; set; } = double.NaN;
 
-        public RasterCell(T value)
+        public RasterCell(T value, double cellSize)
         {
-            this.value = value;
+            this.Value = value;
+            this.CellSize = cellSize;
         }
 
+        #region Fluent Interface
         public IRasterCell<T> SetCellSize(double cellSize)
         {
-            throw new NotImplementedException();
+            if (cellSize < 0) throw new ArgumentException($"CellSize must be a non-zero, positive decimal value", nameof(cellSize));
+
+            this.CellSize = cellSize;
+            return this;
         }
 
         public IRasterCell<T> SetValue(T value)
         {
-            throw new NotImplementedException();
+            this.Value = value;
+            return this;
         }
 
         public IRasterCell<T> SetXIndex(long xIndex)
         {
-            throw new NotImplementedException();
+            this.XIndex = xIndex;
+            return this;
         }
 
         public IRasterCell<T> SetYIndex(long yIndex)
         {
-            throw new NotImplementedException();
+            this.YIndex = yIndex;
+            return this;
         }
 
-        public static long GetIndex(double val, double cellSize)
+        public IRasterCell<T> SetIndices(long xIndex, long yIndex)
         {
-            return (long)Math.Floor(val / cellSize);
+            this.XIndex = xIndex;
+            this.YIndex = yIndex;
+            return this;
+        }
+        #endregion
+
+        #region Static Members
+        public static IRasterCell<T> Generate(T value, double cellSize)
+        {
+            return new RasterCell<T>(value, cellSize);
         }
 
-        public static double GetProjectedDimension(double index, double cellSize)
+        public static IRasterCell<T> Generate(T value, double cellSize, IEnumerable<double> pos)
         {
-            return index * cellSize;
+            if (pos.Count() < 2) throw new ArgumentException($"Position must be at least 2D", nameof(pos));
+
+            return Generate(value, cellSize, pos.ElementAt(0), pos.ElementAt(1));
         }
+
+        public static IRasterCell<T> Generate(T value, double cellSize, double xPos, double yPos)
+        {
+            long xIdx = xPos.ToGridIndex(cellSize);
+            long yIdx = yPos.ToGridIndex(cellSize);
+
+            return Generate(value, cellSize).SetIndices(xIdx, yIdx);
+        }
+        #endregion
     }
 }

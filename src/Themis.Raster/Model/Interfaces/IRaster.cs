@@ -16,12 +16,13 @@ namespace Themis.Raster.Model.Interfaces
         public double Bottom { get; }
         public double PixelSize { get; }
 
-        public IBoundingBox BoundingBox { get; }
+        IBoundingBox BoundingBox { get; }
+        IInfiniteGrid<RasterCell<T>> Grid { get; }
 
         public Vector<double> Minimum { get; }
         public Vector<double> Maximum { get; }
 
-        T GetValue(double x, double y);
+        bool TryGetValue(double x, double y, out T? value);
         void CheckExtrema(IEnumerable<T> values);
     }
 }
