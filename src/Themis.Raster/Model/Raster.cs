@@ -1,10 +1,6 @@
-﻿using Themis.Geometry;
-using Themis.Geometry.Boundary;
-using Themis.Geometry.Boundary.Interfaces;
+﻿using Themis.Geometry.Boundary;
 
 using Themis.Raster.Model.Interfaces;
-
-using MathNet.Numerics.LinearAlgebra;
 
 namespace Themis.Raster.Model
 {
@@ -15,19 +11,16 @@ namespace Themis.Raster.Model
 
         public double PixelSize { get; private set; }
 
-        public double Top => bb.MaxY;
-        public double Left => bb.MinX;
-        public double Right => bb.MaxX;
-        public double Bottom => bb.MinY;
+        public double MinX => BoundingBox.MinX;
+        public double MinY => BoundingBox.MinY;
+        public double MinZ => BoundingBox.MaxZ;
+        public double MaxX => BoundingBox.MaxX;
+        public double MaxY => BoundingBox.MaxY;
+        public double MaxZ => BoundingBox.MaxZ;
 
-        public Vector<double> Minimum => new[] { Top, Left }.ToVector();
-        public Vector<double> Maximum => new[] { Right, Bottom }.ToVector();
+        public BoundingBox BoundingBox { get; private set; }
 
-        public IBoundingBox BoundingBox => bb;
-        public IInfiniteGrid<RasterCell<T>> Grid => grid;
-
-        private readonly IBoundingBox bb;
-        private readonly IInfiniteGrid<RasterCell<T>> grid;
+        private readonly IInfiniteGrid<T> grid;
 
         public Raster(int width, int height, double pixelSize)
         {
@@ -35,22 +28,60 @@ namespace Themis.Raster.Model
             this.Height = height;
             this.PixelSize = pixelSize;
 
-            bb = new BoundingBox();
-            grid = new InfiniteGrid<RasterCell<T>>(pixelSize);
+            this.BoundingBox = new BoundingBox();
+            this.grid = new InfiniteGrid<T>(pixelSize);
+        }
+
+        public IRaster<T> Add(T value, long xIdx, long yIdx)
+        {
+            grid.Add(value, xIdx, yIdx);
+            return this;
+        }
+
+        public IRaster<T> Add(T value, double x, double y)
+        {
+            grid.Add(value, x, y);
+            return this;
+        }
+
+        public IRaster<T> Add(T value, IEnumerable<double> pos)
+        {
+            grid.Add(value, pos);
+            return this;
+        }
+
+        public IRaster<T> Remove(double x, double y)
+        {
+            grid.Remove(x, y);
+            return this;
+        }
+
+        public IRaster<T> Remove(long xIdx, long yIdx)
+        {
+            grid.Remove(xIdx, yIdx);
+            return this;
         }
 
         public bool TryGetValue(double x, double y, out T? value)
         {
-            value = default(T);
+            value = default;
             if (!grid.Contains(x, y)) return false;
 
-            value = grid.Get(x, y).Value;
+            value = grid.Get(x, y);
             return true;
         }
 
-        public void CheckExtrema(IEnumerable<T> values)
+        public void AdjustExtrema(IEnumerable<double> pos)
         {
-            throw new NotImplementedException();
+            if (pos.Count() < 2) throw new ArgumentException($"Position must be at least 2D", nameof(pos));
+
+            BoundingBox.MinX = Math.Min(BoundingBox.MinX, pos.ElementAt(0));
+            BoundingBox.MinY = Math.Min(BoundingBox.MinY, pos.ElementAt(1));
+            BoundingBox.MinZ = pos.Count() > 2 ? Math.Min(BoundingBox.MinZ, pos.ElementAt(2)) : double.NaN;
+
+            BoundingBox.MaxX = Math.Max(BoundingBox.MaxX, pos.ElementAt(0));
+            BoundingBox.MaxY = Math.Max(BoundingBox.MaxY, pos.ElementAt(1));
+            BoundingBox.MaxZ = pos.Count() > 2 ? Math.Max(BoundingBox.MaxZ, pos.ElementAt(2)) : double.NaN;
         }
     }
 }

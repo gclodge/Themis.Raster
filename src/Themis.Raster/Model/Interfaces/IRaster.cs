@@ -1,7 +1,4 @@
-﻿using Themis.Raster.Model.Interfaces;
-using Themis.Geometry.Boundary.Interfaces;
-
-using MathNet.Numerics.LinearAlgebra;
+﻿using Themis.Geometry.Boundary;
 
 namespace Themis.Raster.Model.Interfaces
 {
@@ -10,19 +7,24 @@ namespace Themis.Raster.Model.Interfaces
         public int Width { get; }
         public int Height { get; }
 
-        public double Top { get; }
-        public double Left { get; }
-        public double Right { get; }
-        public double Bottom { get; }
+        public double MinX { get; }
+        public double MinY { get; }
+        public double MinZ { get; }
+        public double MaxX { get; }
+        public double MaxY { get; }
+        public double MaxZ { get; }
+        
         public double PixelSize { get; }
 
-        IBoundingBox BoundingBox { get; }
-        IInfiniteGrid<RasterCell<T>> Grid { get; }
+        BoundingBox BoundingBox { get; }
 
-        public Vector<double> Minimum { get; }
-        public Vector<double> Maximum { get; }
+        IRaster<T> Add(T value, long xIdx, long yIdx);
+        IRaster<T> Add(T value, double x, double y);
+        IRaster<T> Add(T value, IEnumerable<double> pos);
+        IRaster<T> Remove(double x, double y);
+        IRaster<T> Remove(long xIdx, long yIdx);
 
         bool TryGetValue(double x, double y, out T? value);
-        void CheckExtrema(IEnumerable<T> values);
+        void AdjustExtrema(IEnumerable<double> pos);
     }
 }

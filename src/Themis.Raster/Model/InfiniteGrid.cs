@@ -16,7 +16,14 @@ namespace Themis.Raster.Model
 
         public IInfiniteGrid<T> Add(T value, long xIdx, long yIdx)
         {
-            throw new NotImplementedException();
+            if (!Contains(xIdx)) map.Add(xIdx, new Dictionary<long, T>());
+
+            if (!Contains(xIdx, yIdx))
+                map[xIdx].Add(yIdx, value);
+            else
+                map[xIdx][yIdx] = value;
+
+            return this;
         }
 
         public IInfiniteGrid<T> Add(T value, double x, double y)
